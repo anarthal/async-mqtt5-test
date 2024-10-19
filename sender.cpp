@@ -13,7 +13,6 @@
 #include <boost/asio/signal_set.hpp>
 #include <boost/asio/steady_timer.hpp>
 #include <boost/asio/this_coro.hpp>
-#include <boost/system/detail/error_code.hpp>
 #include <boost/system/error_code.hpp>
 
 #include <async_mqtt5/mqtt_client.hpp>
