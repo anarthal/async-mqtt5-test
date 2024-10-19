@@ -70,17 +70,21 @@ asio::awaitable<void> read_sensor(
         double measure = sensor_to_read.read();
 
         // Publish the measure
-        co_await cli.async_publish<mqtt::qos_e::at_most_once>(
+        cli.async_publish<mqtt::qos_e::at_most_once>(
             std::string(sensor_name),
             std::to_string(measure),
             mqtt::retain_e::yes,
-            mqtt::publish_props{}
+            mqtt::publish_props{},
+            [](error_code ec) {
+                if (ec)
+                    std::cout << "Error during publish: " << ec << std::endl;
+            }
         );
 
         // Wait until the next measure is due
         next_tp += period;
         timer.expires_at(next_tp);
-        auto [ec] = co_await timer.async_wait(asio::as_tuple(asio::deferred));
+        auto [ec] = co_await timer.async_wait(asio::as_tuple);
         if (ec)
             co_return;
     }
@@ -114,7 +118,7 @@ int main()
         std::cout << "Client finished with error code: " << ec << std::endl;
     });
 
-    // // Spawn the readers
+    // Spawn the readers
     auto rethrow = [](std::exception_ptr exc) {
         if (exc)
             std::rethrow_exception(exc);
